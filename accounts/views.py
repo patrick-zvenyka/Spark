@@ -1,19 +1,45 @@
 from django.contrib import messages
-from django.contrib.auth import views as auth_views
+from django.contrib.auth import login, logout, views as auth_views
+from django.shortcuts import redirect, render
+from django.views import View
+from django.views.generic import CreateView
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import UpdateView
 
-from .forms import ProfileForm
+from .forms import ProfileForm, StudentSignupForm
+
+
+class StudentSignupView(CreateView):
+    form_class = StudentSignupForm
+    template_name = "accounts/signup.html"
+    success_url = reverse_lazy("questions:board")
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        login(self.request, self.object)
+        messages.success(self.request, "Your student account has been created.")
+        return response
 
 
 class LoginView(auth_views.LoginView):
-    template_name = "registration/login.html"
+    template_name = "accounts/login.html"
     redirect_authenticated_user = True
 
 
-class LogoutView(auth_views.LogoutView):
-    pass
+class LogoutView(View):
+    template_name = "accounts/logout.html"
+
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("core:home")
+        return render(request, self.template_name)
+
+    def post(self, request, *args, **kwargs):
+        logout(request)
+        messages.success(request, "You have been logged out.")
+        return redirect("core:home")
 
 
 class PasswordChangeView(auth_views.PasswordChangeView):

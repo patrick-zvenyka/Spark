@@ -20,19 +20,18 @@ def department_staff(department, exclude=None):
 
 
 @transaction.atomic
-def submit_question(*, department, title, body, topic=None):
-    """Create an anonymous question. Returns (question, formatted_private_key)."""
-    question = Question(department=department, topic=topic, title=title, body=body)
-    raw_key = question.set_access_key()
+def submit_question(*, department, title, body, student, topic=None):
+    """Create a question owned by an authenticated student."""
+    question = Question(department=department, topic=topic, title=title, body=body, asked_by=student)
     question.save()
     notify(
         department_staff(department),
         kind=Notification.Kind.NEW_QUESTION,
         title=f"New question for {department.code}: {title[:90]}",
         message=f"Please answer within {department.response_time_hours} hours.",
-        url=reverse("questions:inbox_detail", args=[question.reference]),
+        url=reverse("questions:inbox_detail", args=[question.pk]),
     )
-    return question, raw_key
+    return question
 
 
 @transaction.atomic
@@ -62,7 +61,7 @@ def forward_question(*, question, to_department, actor, note=""):
         kind=Notification.Kind.FORWARDED,
         title=f"Question forwarded to {to_department.code}: {question.title[:90]}",
         message=message,
-        url=reverse("questions:inbox_detail", args=[question.reference]),
+        url=reverse("questions:inbox_detail", args=[question.pk]),
     )
     return question
 
@@ -112,7 +111,7 @@ def notify_overdue(now=None):
                 f"This question has waited longer than the agreed "
                 f"{question.department.response_time_hours} hours."
             ),
-            url=reverse("questions:inbox_detail", args=[question.reference]),
+            url=reverse("questions:inbox_detail", args=[question.pk]),
         )
         Question.objects.filter(pk=question.pk).update(overdue_notified_at=now)
         count += 1

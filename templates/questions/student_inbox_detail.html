@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}{{ question.title }} - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-3xl space-y-4">
+    <div class="flex items-center justify-between gap-3">
+        <a href="{% url 'questions:student_inbox' %}" class="text-sm font-semibold text-sky-700 hover:text-sky-900">&larr; My questions</a>
+        <span class="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">{{ question.get_status_display }}</span>
+    </div>
+
+    <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <header class="border-b border-slate-200 px-5 py-4 sm:px-6">
+            <p class="text-xs font-medium uppercase text-sky-700">{{ question.department.name }}{% if question.topic %} / {{ question.topic.name }}{% endif %}</p>
+            <h1 class="mt-1 text-xl font-bold text-slate-950">{{ question.title }}</h1>
+        </header>
+
+        <div class="space-y-4 px-5 py-6 sm:px-6">
+            <div class="flex justify-end">
+                <div class="max-w-[85%] rounded-lg rounded-br-sm bg-sky-700 px-4 py-3 text-white sm:max-w-[70%]">
+                    <p class="whitespace-pre-line text-sm">{{ question.body }}</p>
+                    <time class="mt-2 block text-right text-xs text-sky-100">{{ question.created_at|date:"M j, Y, H:i" }}</time>
+                </div>
+            </div>
+
+            {% for answer in answers %}
+            <div class="flex justify-start">
+                <div class="max-w-[85%] rounded-lg rounded-bl-sm border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 sm:max-w-[70%]">
+                    <p class="text-xs font-semibold text-slate-600">{{ answer.author.display_name }}</p>
+                    <p class="mt-1 whitespace-pre-line text-sm">{{ answer.body }}</p>
+                    <time class="mt-2 block text-xs text-slate-500">{{ answer.created_at|date:"M j, Y, H:i" }}</time>
+                </div>
+            </div>
+            {% empty %}
+            <div class="rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-center text-sm text-slate-600">
+                No lecturer has answered yet.
+            </div>
+            {% endfor %}
+
+            {% if question.status == "rejected" and question.moderation_note %}
+            <div class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {{ question.moderation_note }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

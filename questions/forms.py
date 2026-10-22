@@ -2,7 +2,7 @@ from django import forms
 
 from core.models import Department, Topic
 
-from .models import Answer, Question, normalize_code
+from .models import Answer, Question
 
 
 class TopicSelect(forms.Select):
@@ -73,31 +73,6 @@ class AskForm(forms.ModelForm):
         topic = cleaned.get("topic")
         if department and topic and topic.department_id != department.pk:
             self.add_error("topic", "That topic does not belong to the selected department.")
-        return cleaned
-
-
-class TrackForm(forms.Form):
-    reference = forms.CharField(
-        max_length=20, label="Question reference", widget=forms.TextInput(attrs={"placeholder": "e.g. K7M2QX9P", "autocomplete": "off"})
-    )
-    access_key = forms.CharField(
-        max_length=40,
-        label="Private key",
-        widget=forms.PasswordInput(attrs={"placeholder": "XXXX-XXXX-XXXX", "autocomplete": "off"}, render_value=True),
-    )
-
-    error_message = "We could not find a question with that reference and key."
-
-    def clean(self):
-        cleaned = super().clean()
-        reference = normalize_code(cleaned.get("reference", ""))
-        key = cleaned.get("access_key", "")
-        if not reference or not key:
-            return cleaned
-        question = Question.objects.filter(reference=reference).select_related("department", "topic").first()
-        if question is None or not question.check_access_key(key):
-            raise forms.ValidationError(self.error_message)
-        cleaned["question"] = question
         return cleaned
 
 

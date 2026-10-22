@@ -13,17 +13,17 @@ class AnswerInline(admin.StackedInline):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ("reference", "title", "department", "topic", "status", "is_public", "created_at", "due_at", "answered_at")
+    list_display = ("id", "title", "department", "topic", "status", "is_public", "created_at", "due_at", "answered_at")
     list_filter = ("status", "is_public", "department", "topic")
-    search_fields = ("reference", "title", "body")
+    search_fields = ("title", "body", "asked_by__username")
     date_hierarchy = "created_at"
     list_select_related = ("department", "topic")
     readonly_fields = (
-        "reference", "created_at", "updated_at", "answered_at", "overdue_notified_at",
+        "created_at", "updated_at", "answered_at", "overdue_notified_at",
         "forwarded_from", "moderated_by", "view_count",
     )
     fields = (
-        "reference", "department", "topic", "title", "body", "status", "is_public",
+        "asked_by", "department", "topic", "title", "body", "status", "is_public",
         "due_at", "moderation_note", "created_at", "updated_at", "answered_at",
         "overdue_notified_at", "forwarded_from", "moderated_by", "view_count",
     )
@@ -31,7 +31,7 @@ class QuestionAdmin(admin.ModelAdmin):
     actions = ("hide_from_board", "publish_on_board")
 
     def has_add_permission(self, request):
-        # Questions are only created anonymously by students through the site.
+        # Students create questions through the authenticated site flow.
         return False
 
     @admin.action(description="Hide selected questions from the board")
@@ -47,7 +47,7 @@ class QuestionAdmin(admin.ModelAdmin):
 class AnswerAdmin(admin.ModelAdmin):
     list_display = ("question", "author", "created_at")
     list_filter = ("question__department",)
-    search_fields = ("body", "question__reference", "author__username")
+    search_fields = ("body", "question__title", "author__username")
     list_select_related = ("question", "author")
     autocomplete_fields = ("author",)
     raw_id_fields = ("question",)

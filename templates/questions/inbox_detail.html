@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Question board - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+{% if questions %}
+<div class="space-y-6">
+
+</div>
+
+
+
+{% else %}
+<p>No questions found.</p>
+{% endif %}

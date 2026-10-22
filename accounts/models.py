@@ -4,9 +4,10 @@ from django.db import models
 
 
 class User(AbstractUser):
-    """A staff account. Students never get accounts: they ask anonymously."""
+    """A user account for students or Schoolbridge staff."""
 
     class Role(models.TextChoices):
+        STUDENT = "student", "Student"
         LECTURER = "lecturer", "Lecturer"
         HOD = "hod", "Head of department"
         ADMIN = "admin", "System administrator"
@@ -39,6 +40,8 @@ class User(AbstractUser):
 
     def clean(self):
         super().clean()
+        if self.role == self.Role.STUDENT:
+            return
         needs_department = self.role in (self.Role.LECTURER, self.Role.HOD)
         if needs_department and not self.is_superuser and not self.department_id:
             raise ValidationError({"department": "Lecturers and heads of department must belong to a department."})
@@ -61,6 +64,10 @@ class User(AbstractUser):
     @property
     def is_temporary(self):
         return self.employment_type == self.Employment.TEMPORARY
+
+    @property
+    def is_student(self):
+        return self.role == self.Role.STUDENT
 
     # ------------------------------------------------------------------
     # Permissions
