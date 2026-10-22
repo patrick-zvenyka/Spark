@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth import login, views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Q
@@ -12,8 +13,27 @@ from accounts.models import User
 from notifications.models import Notification
 from notifications.services import notify
 
-from .forms import CommentForm, PostForm
+from .forms import CommentForm, PostForm, StaffSignupForm
 from .models import Post
+
+
+
+class StaffLoginView(auth_views.LoginView):
+    template_name = "tutors/login.html"
+    redirect_authenticated_user = True
+    success_url = reverse_lazy("staffroom:list")
+
+
+class StaffSignupView(CreateView):
+    form_class = StaffSignupForm
+    template_name = "tutors/signup.html"
+    success_url = reverse_lazy("staffroom:list")
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        login(self.request, self.object)
+        messages.success(self.request, "Your staff account has been created.")
+        return response
 
 
 class PostListView(LoginRequiredMixin, ListView):

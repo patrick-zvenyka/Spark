@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Ask a question - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+
+{% if questions %}
+    <ul class="divide-y divide-slate-200">
+        {% for question in questions %}
+        <li class="flex flex-col gap-2 py-4">
+            <div class="flex items-center gap-2 text-sm text-slate-500">
+                <span>{{ question.created_at|date:"M j, Y" }}</span>
+                <span>•</span>
+                <span>{{ question.department.name }}</span>
+                <span>•</span>
+                <span>{{ question.topic.name }}</span>
+            </div>
+            <p class="text-slate-800">{{ question.text|linebreaksbr }}</p>
+        </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p class="text-sm text-slate-600">No questions have been asked yet.</p>
+{% endif %}
+
+{% endblock %}

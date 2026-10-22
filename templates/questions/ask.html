@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Ask a question - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-3xl rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+    <h1 class="text-2xl font-bold text-slate-950">Ask a question</h1>
+    <p class="mt-2 text-sm text-slate-600">Questions are anonymous. Do not include identifying details.</p>
+
+    {% if form.non_field_errors %}
+    <div class="mt-5 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
+        {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <form method="post" class="mt-6 space-y-5">
+        {% csrf_token %}
+
+        {% for field in form.visible_fields %}
+        {% if field.name != "website" %}
+        <div>
+            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-800">{{ field.label }}</label>
+            <div class="mt-2 [&_input]:block [&_input]:w-full [&_input]:rounded-md [&_input]:border [&_input]:border-slate-300 [&_input]:px-3 [&_input]:py-2 [&_select]:block [&_select]:w-full [&_select]:rounded-md [&_select]:border [&_select]:border-slate-300 [&_select]:px-3 [&_select]:py-2 [&_textarea]:block [&_textarea]:w-full [&_textarea]:rounded-md [&_textarea]:border [&_textarea]:border-slate-300 [&_textarea]:px-3 [&_textarea]:py-2">
+                {{ field }}
+            </div>
+            {% if field.help_text %}<p class="mt-1 text-xs text-slate-500">{{ field.help_text }}</p>{% endif %}
+            {% for error in field.errors %}<p class="mt-1 text-sm text-red-700">{{ error }}</p>{% endfor %}
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        <div class="hidden" aria-hidden="true">
+            {{ form.website.label_tag }}
+            {{ form.website }}
+        </div>
+
+        <button type="submit" class="rounded-md bg-sky-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-800">
+            Submit question
+        </button>
+    </form>
+</section>
+<script>
+(function () {
+    const department = document.querySelector('[name="department"]');
+    const topic = document.querySelector('[name="topic"]');
+    if (!department || !topic) return;
+
+    function filterTopics() {
+        const departmentId = department.value;
+        for (const option of topic.options) {
+            if (!option.value) {
+                option.hidden = false;
+                continue;
+            }
+            option.hidden = option.dataset.department !== departmentId;
+        }
+        if (topic.selectedOptions[0]?.hidden) topic.value = "";
+    }
+
+    department.addEventListener("change", filterTopics);
+    filterTopics();
+})();
+</script>
+{% endblock %}
