@@ -37,7 +37,7 @@ class StaffSignupView(CreateView):
 
 
 class PostListView(LoginRequiredMixin, ListView):
-    template_name = "staffroom/list.html"
+    template_name = "tutors/posts.html"
     context_object_name = "posts"
     paginate_by = 15
 
@@ -46,6 +46,7 @@ class PostListView(LoginRequiredMixin, ListView):
             Post.objects.visible_to(self.request.user)
             .select_related("author", "department")
             .annotate(num_comments=Count("comments"))
+            .order_by("-is_pinned", "-created_at")
         )
         self.kind = self.request.GET.get("kind", "")
         if self.kind in Post.Kind.values:

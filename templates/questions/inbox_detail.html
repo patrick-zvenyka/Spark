@@ -1,15 +1,101 @@
 {% extends "base.html" %}
 
-{% block title %}Question board - {{ SITE_NAME }}{% endblock %}
+{% block title %}{{ question.title }} - {{ SITE_NAME }}{% endblock %}
 
 {% block content %}
-{% if questions %}
-<div class="space-y-6">
+<section class="mx-auto max-w-5xl space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <a href="{% url 'questions:inbox' %}" class="text-sm font-semibold text-sky-700 hover:text-sky-900">&larr; Question inbox</a>
+    <span class="rounded-md border border-slate-200 bg-white px-3 py-1 text-sm font-medium text-slate-700">{{ question.get_status_display }}</span>
+  </div>
 
-</div>
+  <article class="overflow-hidden rounded-lg border border-slate-200 bg-white">
+    <header class="border-b border-slate-200 px-5 py-5 sm:px-6">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p class="text-xs font-semibold uppercase text-sky-700">
+            {{ question.department.name }}{% if question.topic %} / {{ question.topic.name }}{% endif %}
+          </p>
+          <h1 class="mt-2 text-2xl font-bold text-slate-950">{{ question.title }}</h1>
+        </div>
+        {% if question.is_overdue %}
+        <span class="rounded-md bg-rose-100 px-3 py-1 text-xs font-bold text-rose-800">Overdue</span>
+        {% endif %}
+      </div>
+      <p class="mt-4 whitespace-pre-line text-sm leading-6 text-slate-700">{{ question.body }}</p>
+      <p class="mt-4 text-xs text-slate-500">
+        Asked {{ question.created_at|date:"M j, Y H:i" }} by {{ question.asked_by.display_name|default:"Student" }}
+        {% if question.due_at %}| Due {{ question.due_at|date:"M j, Y H:i" }}{% endif %}
+      </p>
+    </header>
 
+    <div class="px-5 py-5 sm:px-6">
+      <h2 class="text-sm font-bold text-slate-950">Answers</h2>
+      <div class="mt-4 space-y-3">
+        {% for answer in answers %}
+        <article class="rounded-md border border-slate-200 bg-slate-50 px-4 py-4">
+          <p class="text-xs font-semibold text-slate-600">{{ answer.author.display_name }}</p>
+          <p class="mt-2 whitespace-pre-line text-sm leading-6 text-slate-800">{{ answer.body }}</p>
+          <p class="mt-2 text-xs text-slate-500">{{ answer.created_at|date:"M j, Y H:i" }}</p>
+        </article>
+        {% empty %}
+        <p class="rounded-md border border-slate-200 bg-slate-50 px-4 py-5 text-center text-sm text-slate-500">No answers have been posted yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </article>
 
+  {% if question.can_receive_answers %}
+  <section class="rounded-lg border border-slate-200 bg-white p-5 sm:p-6">
+    <h2 class="text-lg font-bold text-slate-950">Post an answer</h2>
+    <form method="post" class="mt-4 space-y-4">
+      {% csrf_token %}
+      <input type="hidden" name="form" value="answer">
+      <div>
+        <label for="{{ answer_form.body.id_for_label }}" class="block text-sm font-medium text-slate-800">Your answer</label>
+        <div class="mt-2 [&_textarea]:block [&_textarea]:w-full [&_textarea]:rounded-md [&_textarea]:border [&_textarea]:border-slate-300 [&_textarea]:px-3 [&_textarea]:py-2 [&_textarea]:text-sm">
+          {{ answer_form.body }}
+        </div>
+        {% if answer_form.body.errors %}
+        <p class="mt-2 text-sm text-red-700">{{ answer_form.body.errors|join:", " }}</p>
+        {% endif %}
+      </div>
+      <button type="submit" class="rounded-md bg-sky-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-800">Post answer</button>
+    </form>
+  </section>
+  {% endif %}
 
-{% else %}
-<p>No questions found.</p>
-{% endif %}
+  {% if user.is_system_admin or user.is_hod or user.is_teacher %}
+  <details class="rounded-lg border border-slate-200 bg-white">
+    <summary class="cursor-pointer px-5 py-4 text-sm font-bold text-slate-900">Question management</summary>
+    <form method="post" class="space-y-4 border-t border-slate-200 px-5 py-5">
+      {% csrf_token %}
+      <input type="hidden" name="form" value="moderate">
+
+      <div>
+        <label for="{{ moderation_form.action.id_for_label }}" class="block text-sm font-medium text-slate-800">Action</label>
+        <div class="mt-2 [&_select]:block [&_select]:w-full [&_select]:rounded-md [&_select]:border [&_select]:border-slate-300 [&_select]:px-3 [&_select]:py-2 [&_select]:text-sm">
+          {{ moderation_form.action }}
+        </div>
+      </div>
+
+      <div>
+        <label for="{{ moderation_form.department.id_for_label }}" class="block text-sm font-medium text-slate-800">Forward to department</label>
+        <div class="mt-2 [&_select]:block [&_select]:w-full [&_select]:rounded-md [&_select]:border [&_select]:border-slate-300 [&_select]:px-3 [&_select]:py-2 [&_select]:text-sm">
+          {{ moderation_form.department }}
+        </div>
+      </div>
+
+      <div>
+        <label for="{{ moderation_form.note.id_for_label }}" class="block text-sm font-medium text-slate-800">Note</label>
+        <div class="mt-2 [&_textarea]:block [&_textarea]:w-full [&_textarea]:rounded-md [&_textarea]:border [&_textarea]:border-slate-300 [&_textarea]:px-3 [&_textarea]:py-2 [&_textarea]:text-sm">
+          {{ moderation_form.note }}
+        </div>
+      </div>
+
+      <button type="submit" class="rounded-md border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Apply action</button>
+    </form>
+  </details>
+  {% endif %}
+</section>
+{% endblock %}
