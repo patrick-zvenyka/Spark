@@ -1,0 +1,11 @@
+<nav class="flex items-center gap-4 text-sm font-medium" aria-label="Teacher navigation">
+  <a href="{% url 'dashboard:home' %}" class="text-slate-600 hover:text-slate-950">Dashboard</a>
+  <a href="{% url 'questions:inbox' %}" class="text-slate-600 hover:text-slate-950">Question inbox</a>
+  <a href="{% url 'questions:board' %}" class="text-slate-600 hover:text-slate-950">Question board</a>
+  <a href="{% url 'staffroom:list' %}" class="text-slate-600 hover:text-slate-950">Staffroom</a>
+  <a href="{% url 'accounts:profile' %}" class="text-slate-600 hover:text-slate-950">Profile</a>
+  <form method="post" action="{% url 'accounts:logout' %}">
+    {% csrf_token %}
+    <button type="submit" class="text-slate-600 hover:text-slate-950">Log out</button>
+  </form>
+</nav>

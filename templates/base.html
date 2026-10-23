@@ -10,21 +10,13 @@
     <header class="border-b border-slate-200 bg-white">
         <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
             <a href="{% url 'core:home' %}" class="text-lg font-bold text-slate-950">{{ SITE_NAME }}</a>
-            <nav class="flex items-center gap-4 text-sm font-medium">
-                <a href="{% url 'core:home' %}" class="text-slate-600 hover:text-slate-950">Home</a>
-                {% if user.is_authenticated %}
-                <a href="{% url 'questions:ask' %}" class="text-slate-600 hover:text-slate-950">Ask a question</a>
-                <a href="{% url 'questions:board' %}" class="text-slate-600 hover:text-slate-950">Question board</a>
-                {% if user.is_student %}<a href="{% url 'questions:student_inbox' %}" class="text-slate-600 hover:text-slate-950">My questions</a>{% endif %}
-                <form method="post" action="{% url 'accounts:logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="text-slate-600 hover:text-slate-950">Log out</button>
-                </form>
-                {% else %}
-                <a href="{% url 'accounts:login' %}" class="text-slate-600 hover:text-slate-950">Log in</a>
-                <a href="{% url 'accounts:signup' %}" class="rounded-md bg-sky-700 px-3 py-2 text-white hover:bg-sky-800">Sign up</a>
-                {% endif %}
-            </nav>
+            {% if user.is_authenticated and user.is_student %}
+                {% include "components/student_navbar.html" %}
+            {% elif user.is_authenticated and user.is_teacher or user.is_authenticated and user.is_hod or user.is_authenticated and user.is_system_admin %}
+                {% include "components/teacher_navbar.html" %}
+            {% else %}
+                {% include "components/public_navbar.html" %}
+            {% endif %}
         </div>
     </header>
     <main class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">

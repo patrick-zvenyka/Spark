@@ -26,7 +26,7 @@ class StaffSignupForm(UserCreationForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.role = User.Role.LECTURER
+        user.role = User.Role.TEACHER
         user.employment_type = User.Employment.PERMANENT
         if commit:
             user.save()

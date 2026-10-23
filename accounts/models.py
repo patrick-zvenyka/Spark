@@ -8,7 +8,7 @@ class User(AbstractUser):
 
     class Role(models.TextChoices):
         STUDENT = "student", "Student"
-        LECTURER = "lecturer", "Lecturer"
+        TEACHER = "teacher", "Teacher"
         HOD = "hod", "Head of department"
         ADMIN = "admin", "System administrator"
 
@@ -16,7 +16,7 @@ class User(AbstractUser):
         PERMANENT = "permanent", "Permanent"
         TEMPORARY = "temporary", "Temporary"
 
-    role = models.CharField(max_length=20, choices=Role.choices, default=Role.LECTURER)
+    role = models.CharField(max_length=20, choices=Role.choices, default=Role.TEACHER)
     employment_type = models.CharField(
         max_length=20, choices=Employment.choices, default=Employment.PERMANENT
     )
@@ -29,7 +29,7 @@ class User(AbstractUser):
     )
     title = models.CharField(max_length=30, blank=True, help_text="e.g. Dr, Mr, Ms, Prof")
     contract_end = models.DateField(
-        null=True, blank=True, help_text="Optional end date for temporary lecturers."
+        null=True, blank=True, help_text="Optional end date for temporary teachers."
     )
 
     class Meta:
@@ -42,9 +42,9 @@ class User(AbstractUser):
         super().clean()
         if self.role == self.Role.STUDENT:
             return
-        needs_department = self.role in (self.Role.LECTURER, self.Role.HOD)
+        needs_department = self.role in (self.Role.TEACHER, self.Role.HOD)
         if needs_department and not self.is_superuser and not self.department_id:
-            raise ValidationError({"department": "Lecturers and heads of department must belong to a department."})
+            raise ValidationError({"department": "Teachers and heads of department must belong to a department."})
 
     # ------------------------------------------------------------------
     # Display helpers
@@ -68,6 +68,10 @@ class User(AbstractUser):
     @property
     def is_student(self):
         return self.role == self.Role.STUDENT
+
+    @property
+    def is_teacher(self):
+        return self.role == self.Role.TEACHER
 
     # ------------------------------------------------------------------
     # Permissions

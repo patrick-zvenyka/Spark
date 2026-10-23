@@ -151,7 +151,7 @@ class Question(models.Model):
 
 
 class Answer(models.Model):
-    """An answer is always signed by the lecturer who gave it (accountability)."""
+    """An answer is always signed by the teacher who gave it (accountability)."""
 
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="answers")
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="answers")

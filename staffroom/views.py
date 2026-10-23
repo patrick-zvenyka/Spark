@@ -21,7 +21,7 @@ from .models import Post
 class StaffLoginView(auth_views.LoginView):
     template_name = "tutors/login.html"
     redirect_authenticated_user = True
-    success_url = reverse_lazy("staffroom:list")
+    success_url = reverse_lazy("dashboard:home")
 
 
 class StaffSignupView(CreateView):

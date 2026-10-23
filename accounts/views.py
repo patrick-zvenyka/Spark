@@ -27,6 +27,11 @@ class LoginView(auth_views.LoginView):
     template_name = "accounts/login.html"
     redirect_authenticated_user = True
 
+    def get_success_url(self):
+        if self.request.user.is_teacher or self.request.user.is_hod or self.request.user.is_system_admin:
+            return reverse_lazy("dashboard:home")
+        return reverse_lazy("questions:student_inbox")
+
 
 class LogoutView(View):
     template_name = "accounts/logout.html"
