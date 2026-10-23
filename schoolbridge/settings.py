@@ -14,7 +14,7 @@ TESTING = len(sys.argv) > 1 and sys.argv[1] == "test"
 # --------------------------------------------------------------------------
 DEBUG = True
 
-SECRET_KEY = "django-insecure-development-key-do-not-use-in-production"
+SECRET_KEY = "schoolbridge-production-change-this-to-a-long-random-secret-before-deployment"
 
 ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = []
@@ -71,14 +71,34 @@ WSGI_APPLICATION = "schoolbridge.wsgi.application"
 ASGI_APPLICATION = "schoolbridge.asgi.application"
 
 # --------------------------------------------------------------------------
-# Database
+# Database: Supabase PostgreSQL
 # --------------------------------------------------------------------------
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+import socket
+
+SUPABASE_HOST = "aws-1-eu-west-3.pooler.supabase.com"
+
+try:
+    socket.getaddrinfo(SUPABASE_HOST, 5432)
+except socket.gaierror:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": "postgres",
+            "USER": "postgres.nnwwctuakyvfzsgyftbe",
+            "PASSWORD": "BBQYrj9Av88pkknz",
+            "HOST": SUPABASE_HOST,
+            "PORT": "5432",
+            "CONN_MAX_AGE": 60,
+            "OPTIONS": {"sslmode": "require"},
+        }
+    }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.User"
@@ -171,7 +191,7 @@ LOGGING = {
 # --------------------------------------------------------------------------
 SB_SITE_NAME = "Schoolbridge"
 SB_INSTITUTION_NAME = "Our Institution"
-SB_SITE_URL = "http://localhost:8000"
+SB_SITE_URL = "http://0.0.0.0:80"
 SB_ADMIN_URL = "admin/"
 
 # Agreed response period for departments (can be overridden per department).

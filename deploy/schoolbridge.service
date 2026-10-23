@@ -1,0 +1,18 @@
+[Unit]
+Description=Schoolbridge Django application
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/Spark
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+Environment="PYTHONUNBUFFERED=1"
+Environment="DJANGO_SETTINGS_MODULE=schoolbridge.settings"
+ExecStart=/home/ubuntu/Spark/env/bin/gunicorn schoolbridge.wsgi:application --config gunicorn.conf.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
